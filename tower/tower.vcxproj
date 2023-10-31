@@ -154,7 +154,14 @@
   <ItemGroup>
     <ClInclude Include="CustomWindows.h" />
     <ClInclude Include="Exception.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="Window.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="tower.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Assets\Icon\tower-logo-v1.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
