@@ -17,6 +17,11 @@ int CALLBACK WinMain(
 		{
 			TranslateMessage(&message); // Creates WM_CHAR messages if the event is a key press
 			DispatchMessage(&message);
+
+			if (window.keyboard.KeyIsPressed(VK_SPACE))
+			{
+				MessageBox(nullptr, "HUHA", "Space is pressed", MB_OK);
+			}
 		}
 
 		if (gResult == -1)

@@ -72,6 +72,24 @@ LRESULT Window::HandleMessage(HWND windowHandle, UINT messageType, WPARAM wParam
 	case WM_CLOSE:
 		PostQuitMessage(0);
 		return 0;
+	case WM_KEYDOWN:
+	case WM_SYSKEYDOWN:
+		if (!(lParam & 0x40000000) || keyboard.AutoRepeatIsEnabled())
+		{
+			keyboard.OnKeyPressed(static_cast<unsigned char>(wParam));
+		}
+		break;
+	case WM_KEYUP:
+	case WM_SYSKEYUP:
+		keyboard.OnKeyReleased(static_cast<unsigned char>(wParam));
+		break;
+	case WM_CHAR:
+	case WM_SYSCHAR:
+		keyboard.OnChar(static_cast<unsigned char>(wParam));
+		break;
+	case WM_KILLFOCUS:
+		keyboard.ClearState();
+		break;
 	}
 
 	return DefWindowProc(windowHandle, messageType, wParam, lParam);
@@ -129,9 +147,7 @@ Window::WindowException::WindowException(int line, const char* file, HRESULT hRe
 	: 
 	Exception(line, file), 
 	hResult(hResult) 
-{
-
-}
+{}
 
 const char* Window::WindowException::what() const noexcept
 {

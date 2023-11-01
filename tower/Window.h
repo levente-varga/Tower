@@ -2,6 +2,7 @@
 
 #include "CustomWindows.h"
 #include "Exception.h"
+#include "Keyboard.h"
 
 class Window
 {
@@ -45,6 +46,8 @@ public:
 	private:
 		HRESULT hResult;
 	};
+
+	Keyboard keyboard;
 
 	Window(int width, int height, const char* name);
 	~Window();
