@@ -22,36 +22,14 @@ public:
 		unsigned char keyCode;
 
 	public:
-		Event() noexcept
-			:
-			type(Type::Invalid),
-			keyCode(0)
-		{}
-		Event(Type type, unsigned char keyCode)
-			:
-			type(type),
-			keyCode(keyCode)
-		{}
-		bool IsPress() const noexcept
-		{
-			return type == Type::Press;
-		}
-		bool IsRelease() const noexcept
-		{
-			return type == Type::Press;
-		}
-		bool IsValid() const noexcept
-		{
-			return type == Type::Press;
-		}
-		Type GetType() const noexcept
-		{
-			return type;
-		}
-		unsigned char GetKeyCode() const noexcept
-		{
-			return keyCode;
-		}
+		Event() noexcept;
+		Event(Type type, unsigned char keyCode) noexcept;
+
+		bool IsPress() const noexcept;
+		bool IsRelease() const noexcept;
+		bool IsValid() const noexcept;
+		Type GetType() const noexcept;
+		unsigned char GetKeyCode() const noexcept;
 	};
 
 	Keyboard() = default;
@@ -82,8 +60,8 @@ private:
 	template<typename T>
 	static void TrimBuffer(std::queue<T>& buffer) noexcept;
 
-	static constexpr unsigned int nKeys = 256u;
-	static constexpr unsigned int bufferSize = 16u;
+	static constexpr unsigned int nKeys = 256;
+	static constexpr unsigned int bufferMaxSize = 16;
 	bool autoRepeatEnabled = false;
 	std::bitset<nKeys> keyStates;
 	std::queue<Event> keyBuffer;

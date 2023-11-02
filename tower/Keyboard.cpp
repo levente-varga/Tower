@@ -102,8 +102,51 @@ void Keyboard::ClearState() noexcept
 template<typename T>
 void Keyboard::TrimBuffer(std::queue<T>& buffer) noexcept
 {
-	while (buffer.size() > bufferSize)
+	while (buffer.size() > bufferMaxSize)
 	{
 		buffer.pop();
 	}
+}
+
+
+
+/*
+ * Implementation of Keyboard::Event 
+ */
+
+Keyboard::Event::Event() noexcept
+	:
+	type(Type::Invalid),
+	keyCode(0)
+{}
+
+Keyboard::Event::Event(Type type, unsigned char keyCode) noexcept
+	:
+	type(type),
+	keyCode(keyCode)
+{}
+
+bool Keyboard::Event::IsPress() const noexcept
+{
+	return type == Type::Press;
+}
+
+bool Keyboard::Event::IsRelease() const noexcept
+{
+	return type == Type::Press;
+}
+
+bool Keyboard::Event::IsValid() const noexcept
+{
+	return type == Type::Press;
+}
+
+Keyboard::Event::Type Keyboard::Event::GetType() const noexcept
+{
+	return type;
+}
+
+unsigned char Keyboard::Event::GetKeyCode() const noexcept
+{
+	return keyCode;
 }

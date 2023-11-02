@@ -6,7 +6,10 @@
  *	Implementation of Window
  */
 
-Window::Window(int width, int height, const char* name)
+Window::Window(int width, int height, const std::string title)
+	:
+	width(width),
+	height(height)
 {
 	RECT windowRect;
 	windowRect.left = 100;
@@ -14,14 +17,14 @@ Window::Window(int width, int height, const char* name)
 	windowRect.top = 100;
 	windowRect.bottom = height + windowRect.top;
 
-	if (FAILED(AdjustWindowRect(&windowRect, WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, FALSE)))
+	if (AdjustWindowRect(&windowRect, WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU, FALSE) == 0)
 	{
 		throw WINDOW_EXCEPTION(GetLastError());
 	}
 
 	windowHandle = CreateWindow(
 		WindowClass::GetName(),
-		name,											// title
+		title.c_str(),											// title
 		WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU,
 		CW_USEDEFAULT,									// default starting position X
 		CW_USEDEFAULT,									// default starting position Y
@@ -44,6 +47,14 @@ Window::Window(int width, int height, const char* name)
 Window::~Window()
 {
 	DestroyWindow(windowHandle);
+}
+
+void Window::SetTitle(const std::string title)
+{
+	if (SetWindowText(windowHandle, title.c_str()) == 0)
+	{
+		throw WINDOW_EXCEPTION(GetLastError());
+	}
 }
 
 LRESULT CALLBACK Window::HandleMessageSetup(HWND windowHandle, UINT messageType, WPARAM wParam, LPARAM lParam) noexcept

@@ -118,3 +118,69 @@ bool Mouse::QueueIsEmpty() const noexcept
 {
 	return buffer.empty();
 }
+
+
+
+/*
+ * Implementation of Mouse::Event
+ */
+
+Mouse::Event::Event() noexcept
+	:
+	type(Type::Invalid),
+	leftIsPressed(false),
+	rightIsPressed(false),
+	middleIsPressed(false),
+	x(0),
+	y(0)
+{}
+
+Mouse::Event::Event(Type type, const Mouse& mouse) noexcept
+	:
+	type(type),
+	leftIsPressed(mouse.leftIsPressed),
+	rightIsPressed(mouse.rightIsPressed),
+	middleIsPressed(mouse.middleIsPressed),
+	x(mouse.x),
+	y(mouse.y)
+{}
+
+bool Mouse::Event::IsValid() const noexcept
+{
+	return type != Type::Invalid;
+}
+
+Mouse::Event::Type Mouse::Event::GetType() const noexcept
+{
+	return type;
+}
+
+std::pair<int, int> Mouse::Event::GetPosition() const noexcept
+{
+	return { x, y };
+}
+
+int Mouse::Event::GetPositionX() const noexcept
+{
+	return x;
+}
+
+int Mouse::Event::GetPositionY() const noexcept
+{
+	return y;
+}
+
+bool Mouse::Event::LeftIsPressed() const noexcept
+{
+	return leftIsPressed;
+}
+
+bool Mouse::Event::RightIsPressed() const noexcept
+{
+	return rightIsPressed;
+}
+
+bool Mouse::Event::MiddleIsPressed() const noexcept
+{
+	return middleIsPressed;
+}

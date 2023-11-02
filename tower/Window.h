@@ -51,11 +51,12 @@ public:
 	Keyboard keyboard;
 	Mouse mouse;
 
-	Window(int width, int height, const char* name);
+	Window(int width, int height, const std::string title);
 	~Window();
 	Window(const Window&) = delete;
 	Window& operator=(const Window&) = delete;
+
+	void SetTitle(const std::string title);
 };
 
-// 
 #define WINDOW_EXCEPTION(hResult) Window::WindowException(__LINE__, __FILE__, hResult)
