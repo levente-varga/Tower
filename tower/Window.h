@@ -3,6 +3,7 @@
 #include "CustomWindows.h"
 #include "Exception.h"
 #include "Keyboard.h"
+#include "Mouse.h"
 
 class Window
 {
@@ -48,6 +49,7 @@ public:
 	};
 
 	Keyboard keyboard;
+	Mouse mouse;
 
 	Window(int width, int height, const char* name);
 	~Window();

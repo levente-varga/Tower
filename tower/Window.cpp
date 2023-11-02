@@ -69,27 +69,93 @@ LRESULT Window::HandleMessage(HWND windowHandle, UINT messageType, WPARAM wParam
 {
 	switch (messageType)
 	{
-	case WM_CLOSE:
-		PostQuitMessage(0);
-		return 0;
-	case WM_KEYDOWN:
-	case WM_SYSKEYDOWN:
-		if (!(lParam & 0x40000000) || keyboard.AutoRepeatIsEnabled())
+		case WM_CLOSE:
 		{
-			keyboard.OnKeyPressed(static_cast<unsigned char>(wParam));
+			PostQuitMessage(0);
+			return 0;
+
 		}
-		break;
-	case WM_KEYUP:
-	case WM_SYSKEYUP:
-		keyboard.OnKeyReleased(static_cast<unsigned char>(wParam));
-		break;
-	case WM_CHAR:
-	case WM_SYSCHAR:
-		keyboard.OnChar(static_cast<unsigned char>(wParam));
-		break;
-	case WM_KILLFOCUS:
-		keyboard.ClearState();
-		break;
+		case WM_KEYDOWN:
+		case WM_SYSKEYDOWN:
+		{
+			if (!(lParam & 0x40000000) || keyboard.AutoRepeatIsEnabled())
+			{
+				keyboard.OnKeyPressed(static_cast<unsigned char>(wParam));
+			}
+			break;
+		}
+		case WM_KEYUP:
+		case WM_SYSKEYUP:
+		{
+			keyboard.OnKeyReleased(static_cast<unsigned char>(wParam));
+			break;
+		}
+		case WM_CHAR:
+		case WM_SYSCHAR:
+		{
+			keyboard.OnChar(static_cast<unsigned char>(wParam));
+			break;
+		}
+		case WM_KILLFOCUS:
+		{
+			keyboard.ClearState();
+			break;
+		}
+		case WM_MOUSEMOVE:
+		{
+			const POINTS point = MAKEPOINTS(lParam);
+			mouse.OnMouseMove(point.x, point.y);
+			break;
+		}
+		case WM_LBUTTONDOWN:
+		{
+			const POINTS point = MAKEPOINTS(lParam);
+			mouse.OnLeftPressed(point.x, point.y);
+			break;
+		}
+		case WM_RBUTTONDOWN:
+		{
+			const POINTS point = MAKEPOINTS(lParam);
+			mouse.OnRightPressed(point.x, point.y);
+			break;
+		}
+		case WM_MBUTTONDOWN:
+		{
+			const POINTS point = MAKEPOINTS(lParam);
+			mouse.OnMiddlePressed(point.x, point.y);
+			break;
+		}
+		case WM_LBUTTONUP:
+		{
+			const POINTS point = MAKEPOINTS(lParam);
+			mouse.OnLeftReleased(point.x, point.y);
+			break;
+		}
+		case WM_RBUTTONUP:
+		{
+			const POINTS point = MAKEPOINTS(lParam);
+			mouse.OnRightReleased(point.x, point.y);
+			break;
+		}
+		case WM_MBUTTONUP:
+		{
+			const POINTS point = MAKEPOINTS(lParam);
+			mouse.OnMiddleReleased(point.x, point.y);
+			break;
+		}
+		case WM_MOUSEWHEEL:
+		{
+			const POINTS point = MAKEPOINTS(lParam);
+			if (GET_WHEEL_DELTA_WPARAM(wParam) > 0)
+			{
+				mouse.OnWheelUp(point.x, point.y);
+			}
+			else
+			{
+				mouse.OnWheelDown(point.x, point.y);
+			}
+			break;
+		}
 	}
 
 	return DefWindowProc(windowHandle, messageType, wParam, lParam);
