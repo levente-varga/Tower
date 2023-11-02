@@ -1,10 +1,10 @@
 #include "Window.h"
 
 int CALLBACK WinMain(
-	HINSTANCE hInstance,
-	HINSTANCE hPrevInstance,
-	LPSTR     lpCmdLine,
-	int       nCmdShow
+	_In_ HINSTANCE hInstance,
+	_In_opt_ HINSTANCE hPrevInstance,
+	_In_ LPSTR lpCmdLine,
+	_In_ int nCmdShow
 ) 
 {
 	try
@@ -17,11 +17,6 @@ int CALLBACK WinMain(
 		{
 			TranslateMessage(&message); // Creates WM_CHAR messages if the event is a key press
 			DispatchMessage(&message);
-
-			if (window.keyboard.KeyIsPressed(VK_SPACE))
-			{
-				MessageBox(nullptr, "HUHA", "Space is pressed", MB_OK);
-			}
 		}
 
 		if (gResult == -1)

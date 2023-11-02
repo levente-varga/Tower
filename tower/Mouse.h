@@ -21,7 +21,9 @@ public:
 			MRelease,
 			WheelUp,
 			WheelDown,
-			Move
+			Move,
+			EnterWindow,
+			LeaveWindow
 		};
 
 	private:
@@ -54,6 +56,7 @@ public:
 	std::pair<int, int> GetPosition() const noexcept;
 	int GetPositionX() const noexcept;
 	int GetPositionY() const noexcept;
+	bool IsInWindow() const noexcept;
 	bool LeftIsPressed() const noexcept;
 	bool RightIsPressed() const noexcept;
 	bool MiddleIsPressed() const noexcept;
@@ -63,6 +66,8 @@ public:
 
 private:
 	void OnMouseMove(int x, int y) noexcept;
+	void OnMouseLeaveWindow() noexcept;
+	void OnMouseEnterWindow() noexcept;
 	void OnLeftPressed(int x, int y) noexcept;
 	void OnRightPressed(int x, int y) noexcept;
 	void OnMiddlePressed(int x, int y) noexcept;
@@ -76,6 +81,7 @@ private:
 	static constexpr unsigned int bufferMaxSize = 16;
 	int x;
 	int y;
+	bool isInWindow;
 	bool leftIsPressed;
 	bool rightIsPressed;
 	bool middleIsPressed;

@@ -116,6 +116,27 @@ LRESULT Window::HandleMessage(HWND windowHandle, UINT messageType, WPARAM wParam
 		{
 			const POINTS point = MAKEPOINTS(lParam);
 			mouse.OnMouseMove(point.x, point.y);
+			if (0 <= point.x && point.x < width && 0 <= point.y && point.y < height)
+			{
+				mouse.OnMouseMove(point.x, point.y);
+				if (!mouse.IsInWindow())
+				{
+					SetCapture(windowHandle);
+					mouse.OnMouseEnterWindow();
+				}
+			}
+			else
+			{
+				if (mouse.LeftIsPressed() || mouse.RightIsPressed() || mouse.MiddleIsPressed())
+				{
+					mouse.OnMouseMove(point.x, point.y);
+				}
+				else
+				{
+					ReleaseCapture();
+					mouse.OnMouseLeaveWindow();
+				}
+			}
 			break;
 		}
 		case WM_LBUTTONDOWN:

@@ -15,6 +15,11 @@ int Mouse::GetPositionY() const noexcept
 	return y;
 }
 
+bool Mouse::IsInWindow() const noexcept
+{
+	return isInWindow;
+}
+
 bool Mouse::LeftIsPressed() const noexcept
 {
 	return leftIsPressed;
@@ -58,38 +63,58 @@ void Mouse::OnMouseMove(int newX, int newY) noexcept
 	TrimBuffer();
 }
 
+void Mouse::OnMouseLeaveWindow() noexcept
+{
+	isInWindow = false;
+	buffer.push(Mouse::Event(Mouse::Event::Type::LeaveWindow, *this));
+	TrimBuffer();
+}
+
+void Mouse::OnMouseEnterWindow() noexcept
+{
+	isInWindow = true;
+	buffer.push(Mouse::Event(Mouse::Event::Type::EnterWindow, *this));
+	TrimBuffer();
+}
+
 void Mouse::OnLeftPressed(int newX, int newY) noexcept
 {
+	leftIsPressed = true;
 	buffer.push(Mouse::Event(Mouse::Event::Type::LPress, *this));
 	TrimBuffer();
 }
 
 void Mouse::OnRightPressed(int newX, int newY) noexcept
 {
+	rightIsPressed = true;
 	buffer.push(Mouse::Event(Mouse::Event::Type::RPress, *this));
 	TrimBuffer();
 }
 
 void Mouse::OnMiddlePressed(int newX, int newY) noexcept
 {
+	middleIsPressed = true;
 	buffer.push(Mouse::Event(Mouse::Event::Type::MPress, *this));
 	TrimBuffer();
 }
 
 void Mouse::OnLeftReleased(int newX, int newY) noexcept
 {
+	leftIsPressed = false;
 	buffer.push(Mouse::Event(Mouse::Event::Type::LRelease, *this));
 	TrimBuffer();
 }
 
 void Mouse::OnRightReleased(int newX, int newY) noexcept
 {
+	rightIsPressed = false;
 	buffer.push(Mouse::Event(Mouse::Event::Type::RRelease, *this));
 	TrimBuffer();
 }
 
 void Mouse::OnMiddleReleased(int newX, int newY) noexcept
 {
+	middleIsPressed = false;
 	buffer.push(Mouse::Event(Mouse::Event::Type::MRelease, *this));
 	TrimBuffer();
 }
