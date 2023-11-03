@@ -1,5 +1,6 @@
 #include "Window.h"
 #include <sstream>
+#include <optional>
 #include "resource.h"
 
 /*
@@ -57,6 +58,23 @@ void Window::SetTitle(const std::string title)
 	}
 }
 
+std::optional<int> Window::ProcessMessages()
+{
+	MSG message;
+	while ((PeekMessage(&message, nullptr, 0, 0, PM_REMOVE)) != 0)
+	{
+		if (message.message == WM_QUIT)
+		{
+			return (int)message.wParam;
+		}
+
+		TranslateMessage(&message); // Creates WM_CHAR messages if the event is a key press
+		DispatchMessage(&message);
+	}
+
+	return {};
+}
+
 LRESULT CALLBACK Window::HandleMessageSetup(HWND windowHandle, UINT messageType, WPARAM wParam, LPARAM lParam) noexcept
 {
 	if (messageType == WM_NCCREATE)
@@ -80,108 +98,108 @@ LRESULT Window::HandleMessage(HWND windowHandle, UINT messageType, WPARAM wParam
 {
 	switch (messageType)
 	{
-		case WM_CLOSE:
-		{
-			PostQuitMessage(0);
-			return 0;
+	case WM_CLOSE:
+	{
+		PostQuitMessage(0);
+		return 0;
 
-		}
-		case WM_KEYDOWN:
-		case WM_SYSKEYDOWN:
+	}
+	case WM_KEYDOWN:
+	case WM_SYSKEYDOWN:
+	{
+		if (!(lParam & 0x40000000) || keyboard.AutoRepeatIsEnabled())
 		{
-			if (!(lParam & 0x40000000) || keyboard.AutoRepeatIsEnabled())
-			{
-				keyboard.OnKeyPressed(static_cast<unsigned char>(wParam));
-			}
-			break;
+			keyboard.OnKeyPressed(static_cast<unsigned char>(wParam));
 		}
-		case WM_KEYUP:
-		case WM_SYSKEYUP:
+		break;
+	}
+	case WM_KEYUP:
+	case WM_SYSKEYUP:
+	{
+		keyboard.OnKeyReleased(static_cast<unsigned char>(wParam));
+		break;
+	}
+	case WM_CHAR:
+	case WM_SYSCHAR:
+	{
+		keyboard.OnChar(static_cast<unsigned char>(wParam));
+		break;
+	}
+	case WM_KILLFOCUS:
+	{
+		keyboard.ClearState();
+		break;
+	}
+	case WM_MOUSEMOVE:
+	{
+		const POINTS point = MAKEPOINTS(lParam);
+		mouse.OnMouseMove(point.x, point.y);
+		if (0 <= point.x && point.x < width && 0 <= point.y && point.y < height)
 		{
-			keyboard.OnKeyReleased(static_cast<unsigned char>(wParam));
-			break;
-		}
-		case WM_CHAR:
-		case WM_SYSCHAR:
-		{
-			keyboard.OnChar(static_cast<unsigned char>(wParam));
-			break;
-		}
-		case WM_KILLFOCUS:
-		{
-			keyboard.ClearState();
-			break;
-		}
-		case WM_MOUSEMOVE:
-		{
-			const POINTS point = MAKEPOINTS(lParam);
 			mouse.OnMouseMove(point.x, point.y);
-			if (0 <= point.x && point.x < width && 0 <= point.y && point.y < height)
+			if (!mouse.IsInWindow())
+			{
+				SetCapture(windowHandle);
+				mouse.OnMouseEnterWindow();
+			}
+		}
+		else
+		{
+			if (mouse.LeftIsPressed() || mouse.RightIsPressed() || mouse.MiddleIsPressed())
 			{
 				mouse.OnMouseMove(point.x, point.y);
-				if (!mouse.IsInWindow())
-				{
-					SetCapture(windowHandle);
-					mouse.OnMouseEnterWindow();
-				}
 			}
 			else
 			{
-				if (mouse.LeftIsPressed() || mouse.RightIsPressed() || mouse.MiddleIsPressed())
-				{
-					mouse.OnMouseMove(point.x, point.y);
-				}
-				else
-				{
-					ReleaseCapture();
-					mouse.OnMouseLeaveWindow();
-				}
+				ReleaseCapture();
+				mouse.OnMouseLeaveWindow();
 			}
-			break;
 		}
-		case WM_LBUTTONDOWN:
-		{
-			const POINTS point = MAKEPOINTS(lParam);
-			mouse.OnLeftPressed(point.x, point.y);
-			break;
-		}
-		case WM_RBUTTONDOWN:
-		{
-			const POINTS point = MAKEPOINTS(lParam);
-			mouse.OnRightPressed(point.x, point.y);
-			break;
-		}
-		case WM_MBUTTONDOWN:
-		{
-			const POINTS point = MAKEPOINTS(lParam);
-			mouse.OnMiddlePressed(point.x, point.y);
-			break;
-		}
-		case WM_LBUTTONUP:
-		{
-			const POINTS point = MAKEPOINTS(lParam);
-			mouse.OnLeftReleased(point.x, point.y);
-			break;
-		}
-		case WM_RBUTTONUP:
-		{
-			const POINTS point = MAKEPOINTS(lParam);
-			mouse.OnRightReleased(point.x, point.y);
-			break;
-		}
-		case WM_MBUTTONUP:
-		{
-			const POINTS point = MAKEPOINTS(lParam);
-			mouse.OnMiddleReleased(point.x, point.y);
-			break;
-		}
-		case WM_MOUSEWHEEL:
-		{
-			const POINTS point = MAKEPOINTS(lParam);
-			const int delta = GET_WHEEL_DELTA_WPARAM(wParam);
-			mouse.OnWheelDelta(point.x, point.y, delta);
-			break;
-		}
+		break;
+	}
+	case WM_LBUTTONDOWN:
+	{
+		const POINTS point = MAKEPOINTS(lParam);
+		mouse.OnLeftPressed(point.x, point.y);
+		break;
+	}
+	case WM_RBUTTONDOWN:
+	{
+		const POINTS point = MAKEPOINTS(lParam);
+		mouse.OnRightPressed(point.x, point.y);
+		break;
+	}
+	case WM_MBUTTONDOWN:
+	{
+		const POINTS point = MAKEPOINTS(lParam);
+		mouse.OnMiddlePressed(point.x, point.y);
+		break;
+	}
+	case WM_LBUTTONUP:
+	{
+		const POINTS point = MAKEPOINTS(lParam);
+		mouse.OnLeftReleased(point.x, point.y);
+		break;
+	}
+	case WM_RBUTTONUP:
+	{
+		const POINTS point = MAKEPOINTS(lParam);
+		mouse.OnRightReleased(point.x, point.y);
+		break;
+	}
+	case WM_MBUTTONUP:
+	{
+		const POINTS point = MAKEPOINTS(lParam);
+		mouse.OnMiddleReleased(point.x, point.y);
+		break;
+	}
+	case WM_MOUSEWHEEL:
+	{
+		const POINTS point = MAKEPOINTS(lParam);
+		const int delta = GET_WHEEL_DELTA_WPARAM(wParam);
+		mouse.OnWheelDelta(point.x, point.y, delta);
+		break;
+	}
 	}
 
 	return DefWindowProc(windowHandle, messageType, wParam, lParam);
@@ -236,10 +254,11 @@ HINSTANCE Window::WindowClass::GetInstance() noexcept
  */
 
 Window::WindowException::WindowException(int line, const char* file, HRESULT hResult) noexcept
-	: 
-	Exception(line, file), 
-	hResult(hResult) 
-{}
+	:
+	Exception(line, file),
+	hResult(hResult)
+{
+}
 
 const char* Window::WindowException::what() const noexcept
 {

@@ -1,30 +1,15 @@
-#include "Window.h"
+#include "Application.h"
 
 int CALLBACK WinMain(
 	_In_ HINSTANCE hInstance,
 	_In_opt_ HINSTANCE hPrevInstance,
 	_In_ LPSTR lpCmdLine,
 	_In_ int nCmdShow
-) 
+)
 {
 	try
 	{
-		Window window(640, 480, "Tower");
-
-		MSG message;
-		BOOL gResult;
-		while ((gResult = GetMessage(&message, nullptr, 0, 0)) > 0)
-		{
-			TranslateMessage(&message); // Creates WM_CHAR messages if the event is a key press
-			DispatchMessage(&message);
-		}
-
-		if (gResult == -1)
-		{
-			return -1;
-		}
-
-		return message.wParam;
+		return Application{}.Start();
 	}
 	catch (const Exception& e)
 	{

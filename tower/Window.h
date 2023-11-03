@@ -1,5 +1,7 @@
 #pragma once
 
+#include <optional>
+
 #include "CustomWindows.h"
 #include "Exception.h"
 #include "Keyboard.h"
@@ -57,6 +59,7 @@ public:
 	Window& operator=(const Window&) = delete;
 
 	void SetTitle(const std::string title);
+	static std::optional<int> ProcessMessages();
 };
 
 #define WINDOW_EXCEPTION(hResult) Window::WindowException(__LINE__, __FILE__, hResult)
