@@ -25,7 +25,7 @@ Window::Window(int width, int height, const std::string title)
 
 	windowHandle = CreateWindow(
 		WindowClass::GetName(),
-		title.c_str(),											// title
+		title.c_str(),									// title
 		WS_CAPTION | WS_MINIMIZEBOX | WS_SYSMENU,
 		CW_USEDEFAULT,									// default starting position X
 		CW_USEDEFAULT,									// default starting position Y
@@ -43,6 +43,8 @@ Window::Window(int width, int height, const std::string title)
 	}
 
 	ShowWindow(windowHandle, SW_SHOWDEFAULT);
+
+	pGraphics = std::make_unique<Graphics>(windowHandle);
 }
 
 Window::~Window()
@@ -73,6 +75,11 @@ std::optional<int> Window::ProcessMessages()
 	}
 
 	return {};
+}
+
+Graphics& Window::GetGraphics()
+{
+	return *pGraphics;
 }
 
 LRESULT CALLBACK Window::HandleMessageSetup(HWND windowHandle, UINT messageType, WPARAM wParam, LPARAM lParam) noexcept

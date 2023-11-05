@@ -1,11 +1,13 @@
 #pragma once
 
 #include <optional>
+#include <memory>
 
 #include "CustomWindows.h"
 #include "Exception.h"
 #include "Keyboard.h"
 #include "Mouse.h"
+#include "Graphics.h"
 
 class Window
 {
@@ -30,6 +32,7 @@ private:
 	int width;
 	int height;
 	HWND windowHandle;
+	std::unique_ptr<Graphics> pGraphics;
 
 	static LRESULT CALLBACK HandleMessageSetup(HWND windowHandle, UINT messageType, WPARAM wParam, LPARAM lParam) noexcept;
 	static LRESULT CALLBACK HandleMessageThunk(HWND windowHandle, UINT messageType, WPARAM wParam, LPARAM lParam) noexcept;
@@ -60,6 +63,7 @@ public:
 
 	void SetTitle(const std::string title);
 	static std::optional<int> ProcessMessages();
+	Graphics& GetGraphics();
 };
 
 #define WINDOW_EXCEPTION(hResult) Window::WindowException(__LINE__, __FILE__, hResult)
