@@ -79,6 +79,10 @@ std::optional<int> Window::ProcessMessages()
 
 Graphics& Window::GetGraphics()
 {
+	if (pGraphics == nullptr)
+	{
+		throw NO_GRAPHICS_EXCEPTION();
+	}
 	return *pGraphics;
 }
 
@@ -272,7 +276,7 @@ const char* Window::WindowException::what() const noexcept
 	std::ostringstream oss;
 	oss << GetType() << std::endl
 		<< "[Error Code] " << GetErrorCode() << std::endl
-		<< "[Description] " << GetErrorString() << std::endl
+		<< "[Description] " << GetErrorDescription() << std::endl
 		<< GetOriginString();
 	whatBuffer = oss.str();
 	return whatBuffer.c_str();
@@ -311,7 +315,12 @@ HRESULT Window::WindowException::GetErrorCode() const noexcept
 	return hResult;
 }
 
-std::string Window::WindowException::GetErrorString() const noexcept
+std::string Window::WindowException::GetErrorDescription() const noexcept
 {
 	return TranslateErrorCode(hResult);
+}
+
+const char* Window::NoGraphicsException::GetType() const noexcept
+{
+	return "Window Exception (No graphics)";
 }

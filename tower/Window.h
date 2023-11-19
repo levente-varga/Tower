@@ -47,10 +47,17 @@ public:
 		virtual const char* GetType() const noexcept override;
 		static std::string TranslateErrorCode(HRESULT hResult) noexcept;
 		HRESULT GetErrorCode() const noexcept;
-		std::string GetErrorString() const noexcept;
+		std::string GetErrorDescription() const noexcept;
 
 	private:
 		HRESULT hResult;
+	};
+
+	class NoGraphicsException : Exception
+	{
+	public:
+		using Exception::Exception;
+		const char* GetType() const noexcept override;
 	};
 
 	Keyboard keyboard;
@@ -67,3 +74,4 @@ public:
 };
 
 #define WINDOW_EXCEPTION(hResult) Window::WindowException(__LINE__, __FILE__, hResult)
+#define NO_GRAPHICS_EXCEPTION() Window::NoGraphicsException(__LINE__, __FILE__)

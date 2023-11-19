@@ -80,12 +80,12 @@ private:
 	void TrimBuffer() noexcept;
 
 	static constexpr unsigned int bufferMaxSize = 16;
-	int x;
-	int y;
+	int x = -1;
+	int y = -1;
 	bool isInWindow;
 	bool leftIsPressed = false;
 	bool rightIsPressed = false;
 	bool middleIsPressed = false;
-	
+
 	std::queue<Event> buffer;
 };
