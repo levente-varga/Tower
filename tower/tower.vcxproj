@@ -148,6 +148,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
+    <ClCompile Include="DebugInfoManager.cpp" />
     <ClCompile Include="Exception.cpp" />
     <ClCompile Include="Graphics.cpp" />
     <ClCompile Include="Keyboard.cpp" />
@@ -159,6 +160,7 @@
   <ItemGroup>
     <ClInclude Include="Application.h" />
     <ClInclude Include="CustomWindows.h" />
+    <ClInclude Include="DebugInfoManager.h" />
     <ClInclude Include="Exception.h" />
     <ClInclude Include="Graphics.h" />
     <ClInclude Include="Keyboard.h" />
