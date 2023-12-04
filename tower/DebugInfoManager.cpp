@@ -32,41 +32,41 @@ DebugInfoManager::DebugInfoManager()
 	}
 
 	HRESULT hResult;
-	GRAPHICS_THROW_NO_INFO(DxgiGetDebugInterface(__uuidof(IDXGIInfoQueue), reinterpret_cast<void**>(&pDxgiInfoQueue)));
+	GRAPHICS_THROW_NO_INFO(DxgiGetDebugInterface(__uuidof(IDXGIInfoQueue), reinterpret_cast<void**>(&debugInfoQueue)));
 }
 
 DebugInfoManager::~DebugInfoManager()
 {
-	if (pDxgiInfoQueue != nullptr)
+	if (debugInfoQueue != nullptr)
 	{
-		pDxgiInfoQueue->Release();
+		debugInfoQueue->Release();
 	}
 }
 
 void DebugInfoManager::Set() noexcept
 {
-	next = pDxgiInfoQueue->GetNumStoredMessages(DXGI_DEBUG_ALL);
+	nextMessageIndex = debugInfoQueue->GetNumStoredMessages(DXGI_DEBUG_ALL);
 }
 
 std::vector<std::string> DebugInfoManager::GetMessages() const
 {
 	std::vector<std::string> messages;
-	const auto end = pDxgiInfoQueue->GetNumStoredMessages(DXGI_DEBUG_ALL);
+	const auto end = debugInfoQueue->GetNumStoredMessages(DXGI_DEBUG_ALL);
 
-	for (auto i = next; i < end; i++)
+	for (auto i = nextMessageIndex; i < end; i++)
 	{
 		HRESULT hResult;
 		SIZE_T messageLength = 0;
 
 		// Query the size of the current message in bytes
-		GRAPHICS_THROW_NO_INFO(pDxgiInfoQueue->GetMessage(DXGI_DEBUG_ALL, i, nullptr, &messageLength));
+		GRAPHICS_THROW_NO_INFO(debugInfoQueue->GetMessage(DXGI_DEBUG_ALL, i, nullptr, &messageLength));
 
 		// Allocate memory for the message
 		auto bytes = std::make_unique<byte[]>(messageLength);
 		auto pMessage = reinterpret_cast<DXGI_INFO_QUEUE_MESSAGE*>(bytes.get());
 
 		// Get the current message
-		GRAPHICS_THROW_NO_INFO(pDxgiInfoQueue->GetMessage(DXGI_DEBUG_ALL, i, pMessage, &messageLength));
+		GRAPHICS_THROW_NO_INFO(debugInfoQueue->GetMessage(DXGI_DEBUG_ALL, i, pMessage, &messageLength));
 		messages.emplace_back(pMessage->pDescription);
 	}
 

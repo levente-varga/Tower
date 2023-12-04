@@ -16,6 +16,6 @@ public:
 	std::vector<std::string> GetMessages() const;
 
 private:
-	unsigned long long next = 0;
-	struct IDXGIInfoQueue* pDxgiInfoQueue = nullptr;
+	unsigned long long nextMessageIndex = 0;
+	struct IDXGIInfoQueue* debugInfoQueue = nullptr;
 };

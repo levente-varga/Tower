@@ -4,6 +4,24 @@
 #include "Graphics.h"
 
 
+#define GRAPHICS_EXCEPTION_NOINFO(hResult) Graphics::GraphicsException(__LINE__, __FILE__, (hr))
+#define GRAPHICS_THROW_NOINFO(hResultCall) if (FAILED(hResult = (hResultCall))) throw Graphics::GraphicsException()
+
+#ifndef NDEBUG
+
+#define GRAPHICS_EXCEPTION(hResult) Graphics::GraphicsException(__LINE__, __FILE__, (hResult), infoManager.GetMessages())
+#define GRAPHICS_THROW_INFO(hResultCall) infoManager.Set(); if (FAILED(hResult = (hResultCall))) throw GRAPHICS_EXCEPTION(hResult)
+#define GRAPHICS_DEVICE_REMOVED_EXCEPTION(hResult) Graphics::DeviceRemovedException(__LINE__, __FILE__, (hResult), infoManager.GetMessages())
+
+#else
+
+#define GRAPHICS_EXCEPTION(hResult) Graphics::GraphicsException(__LINE__, __FILE__, (hResult))
+#define GRAPHICS_THROW_INFO(hResultCall) GFX_THROW_NOINFO(hResultCall)
+#define GRAPHICS_DEVICE_REMOVED_EXCEPTION(hResult) Graphics::DeviceRemovedException(__LINE__, __FILE__)
+
+#endif
+
+
 Graphics::Graphics(HWND windowHandle)
 {
 	DXGI_SWAP_CHAIN_DESC swapChainDescription = {};
@@ -17,17 +35,25 @@ Graphics::Graphics(HWND windowHandle)
 	swapChainDescription.SampleDesc.Count = 1;
 	swapChainDescription.SampleDesc.Quality = 0;
 	swapChainDescription.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	swapChainDescription.BufferCount = 1;
+	swapChainDescription.BufferCount = 2;
 	swapChainDescription.OutputWindow = windowHandle;
 	swapChainDescription.Windowed = TRUE;
-	swapChainDescription.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+	swapChainDescription.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 	swapChainDescription.Flags = 0;
 
-	HRESULT hResult = D3D11CreateDeviceAndSwapChain(
+	UINT swapCreateFlags = 0;
+#ifndef NDEBUG
+	swapCreateFlags |= D3D11_CREATE_DEVICE_DEBUG;
+#endif
+
+	// Used in the macros to get the result of function calls
+	HRESULT hResult;
+
+	GRAPHICS_THROW_INFO(D3D11CreateDeviceAndSwapChain(
 		nullptr,
 		D3D_DRIVER_TYPE_HARDWARE,
 		nullptr,
-		0,
+		swapCreateFlags,
 		nullptr,
 		0,
 		D3D11_SDK_VERSION,
@@ -36,35 +62,21 @@ Graphics::Graphics(HWND windowHandle)
 		&pDevice,
 		nullptr,
 		&pContext
-	);
-
-	if (hResult != S_OK)
-	{
-		throw GRAPHICS_EXCEPTION(hResult);
-	}
+	));
 
 	ID3D11Resource* pBackBuffer = nullptr;
-	hResult = pSwapChain->GetBuffer(
+
+	GRAPHICS_THROW_INFO(pSwapChain->GetBuffer(
 		0,
 		_uuidof(ID3D11Resource),
 		reinterpret_cast<void**>(&pBackBuffer)
-	);
+	));
 
-	if (hResult != S_OK)
-	{
-		throw GRAPHICS_EXCEPTION(hResult);
-	}
-
-	hResult = pDevice->CreateRenderTargetView(
+	GRAPHICS_THROW_INFO(pDevice->CreateRenderTargetView(
 		pBackBuffer,
 		nullptr,
 		&pTarget
-	);
-
-	if (hResult != S_OK)
-	{
-		throw GRAPHICS_EXCEPTION(hResult);
-	}
+	));
 
 	pBackBuffer->Release();
 }
@@ -94,11 +106,22 @@ Graphics::~Graphics()
 
 void Graphics::Present()
 {
-	HRESULT hResult = pSwapChain->Present(1, 0);
+	HRESULT hResult;
 
-	if (hResult == DXGI_ERROR_DEVICE_REMOVED)
+#ifndef NDEBUG
+	infoManager.Set();
+#endif
+
+	if (FAILED(hResult = pSwapChain->Present(1, 0)))
 	{
-		throw DEVICE_REMOVED_EXCEPTION(hResult);
+		if (hResult == DXGI_ERROR_DEVICE_REMOVED)
+		{
+			throw GRAPHICS_DEVICE_REMOVED_EXCEPTION(pDevice->GetDeviceRemovedReason());
+		}
+		else
+		{
+			throw GRAPHICS_EXCEPTION(hResult);
+		}
 	}
 }
 
@@ -114,11 +137,16 @@ void Graphics::ClearBuffer(float red, float green, float blue) noexcept
  *	Implementation of Graphics::GraphicsException
  */
 
-Graphics::GraphicsException::GraphicsException(int line, const char* file, HRESULT hResult) noexcept
+Graphics::GraphicsException::GraphicsException(int line, const char* file, HRESULT hResult, std::vector<std::string> debugInfoMessages) noexcept
 	:
 	Exception(line, file),
 	hResult(hResult)
 {
+	for (int i = 0; i < debugInfoMessages.size(); i++)
+	{
+		debugInfo += debugInfoMessages[i];
+		if (i < debugInfoMessages.size() - 1) debugInfo += '\n';
+	}
 }
 
 const char* Graphics::GraphicsException::what() const noexcept
@@ -126,8 +154,12 @@ const char* Graphics::GraphicsException::what() const noexcept
 	std::ostringstream oss;
 	oss << GetType() << std::endl
 		<< "[Error Code] " << GetErrorCode() << std::endl
-		<< "[Description] " << GetErrorDescription() << std::endl
-		<< GetOriginString();
+		<< "[Description] " << GetErrorDescription() << std::endl;
+	if (!debugInfo.empty())
+	{
+		oss << "\n[Debug Info]\n" << GetDebugInfo() << "\n\n";
+	}
+	oss << GetOriginString();
 	whatBuffer = oss.str();
 	return whatBuffer.c_str();
 }
@@ -168,6 +200,11 @@ HRESULT Graphics::GraphicsException::GetErrorCode() const noexcept
 std::string Graphics::GraphicsException::GetErrorDescription() const noexcept
 {
 	return TranslateErrorCode(hResult);
+}
+
+std::string Graphics::GraphicsException::GetDebugInfo() const noexcept
+{
+	return debugInfo;
 }
 
 const char* Graphics::DeviceRemovedException::GetType() const noexcept
