@@ -64,44 +64,19 @@ Graphics::Graphics(HWND windowHandle)
 		&pContext
 	));
 
-	ID3D11Resource* pBackBuffer = nullptr;
+	Microsoft::WRL::ComPtr<ID3D11Resource> pBackBuffer;
 
 	GRAPHICS_THROW_INFO(pSwapChain->GetBuffer(
 		0,
 		_uuidof(ID3D11Resource),
-		reinterpret_cast<void**>(&pBackBuffer)
+		&pBackBuffer
 	));
 
 	GRAPHICS_THROW_INFO(pDevice->CreateRenderTargetView(
-		pBackBuffer,
+		pBackBuffer.Get(),
 		nullptr,
 		&pTarget
 	));
-
-	pBackBuffer->Release();
-}
-
-Graphics::~Graphics()
-{
-	if (pTarget != nullptr)
-	{
-		pTarget->Release();
-	}
-
-	if (pContext != nullptr)
-	{
-		pContext->Release();
-	}
-
-	if (pSwapChain != nullptr)
-	{
-		pSwapChain->Release();
-	}
-
-	if (pDevice != nullptr)
-	{
-		pDevice->Release();
-	}
 }
 
 void Graphics::Present()
@@ -128,7 +103,7 @@ void Graphics::Present()
 void Graphics::ClearBuffer(float red, float green, float blue) noexcept
 {
 	const float color[] = { red, green, blue, 0 };
-	pContext->ClearRenderTargetView(pTarget, color);
+	pContext->ClearRenderTargetView(pTarget.Get(), color);
 }
 
 
