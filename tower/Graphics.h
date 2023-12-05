@@ -18,12 +18,14 @@ public:
 	void Present();
 	void ClearBuffer(float red, float green, float blue) noexcept;
 
+	void DrawTestTriangle();
+
 private:
 	// &p on these is equal to p.ReleaseAndGetAddressOf()
 	Microsoft::WRL::ComPtr<ID3D11Device> pDevice;
 	Microsoft::WRL::ComPtr<IDXGISwapChain> pSwapChain;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> pContext;
-	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> pTarget;
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> pRenderTarget;
 
 	// Only have this field if the app is built in debug mode
 #ifndef NDEBUG
@@ -48,6 +50,17 @@ public:
 		std::string debugInfo;
 	};
 
+	class InfoException : public Exception
+	{
+	public:
+		InfoException(int line, const char* file, std::vector<std::string> messages = {});
+		const char* what() const noexcept override;
+		const char* GetType() const noexcept override;
+		std::string GetDebugInfo() const noexcept;
+	private:
+		std::string debugInfo;
+	};
+
 	class DeviceRemovedException : public GraphicsException
 	{
 		using GraphicsException::GraphicsException;
@@ -58,6 +71,3 @@ public:
 		std::string reason;
 	};
 };
-
-#define GRAPHICS_EXCEPTION(hResult) Graphics::GraphicsException(__LINE__, __FILE__, hResult)
-#define DEVICE_REMOVED_EXCEPTION(hResult) Graphics::GraphicsException(__LINE__, __FILE__, hResult)

@@ -1,23 +1,27 @@
 #pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "D3DCompiler.lib")
 
 #include <sstream>
 #include "Graphics.h"
+#include <d3dcompiler.h>
 
 
-#define GRAPHICS_EXCEPTION_NOINFO(hResult) Graphics::GraphicsException(__LINE__, __FILE__, (hr))
-#define GRAPHICS_THROW_NOINFO(hResultCall) if (FAILED(hResult = (hResultCall))) throw Graphics::GraphicsException()
+#define GRAPHICS_EXCEPTION_NO_INFO(hResult) Graphics::GraphicsException(__LINE__, __FILE__, (hr))
+#define GRAPHICS_THROW_NO_INFO(hResultCall) if (FAILED(hResult = (hResultCall))) throw Graphics::GraphicsException()
 
 #ifndef NDEBUG
 
 #define GRAPHICS_EXCEPTION(hResult) Graphics::GraphicsException(__LINE__, __FILE__, (hResult), infoManager.GetMessages())
 #define GRAPHICS_THROW_INFO(hResultCall) infoManager.Set(); if (FAILED(hResult = (hResultCall))) throw GRAPHICS_EXCEPTION(hResult)
 #define GRAPHICS_DEVICE_REMOVED_EXCEPTION(hResult) Graphics::DeviceRemovedException(__LINE__, __FILE__, (hResult), infoManager.GetMessages())
+#define GRAPHICS_THROW_INFO_ONLY(call) infoManager.Set(); (call); {auto messages = infoManager.GetMessages(); if (!messages.empty()) {throw Graphics::InfoException(__LINE__, __FILE__, messages);}}
 
 #else
 
 #define GRAPHICS_EXCEPTION(hResult) Graphics::GraphicsException(__LINE__, __FILE__, (hResult))
-#define GRAPHICS_THROW_INFO(hResultCall) GFX_THROW_NOINFO(hResultCall)
+#define GRAPHICS_THROW_INFO(hResultCall) GFX_THROW_NO_INFO(hResultCall)
 #define GRAPHICS_DEVICE_REMOVED_EXCEPTION(hResult) Graphics::DeviceRemovedException(__LINE__, __FILE__)
+#define GRAPHICS_THROW_INFO_ONLY(call) (call)
 
 #endif
 
@@ -75,7 +79,7 @@ Graphics::Graphics(HWND windowHandle)
 	GRAPHICS_THROW_INFO(pDevice->CreateRenderTargetView(
 		pBackBuffer.Get(),
 		nullptr,
-		&pTarget
+		&pRenderTarget
 	));
 }
 
@@ -103,7 +107,113 @@ void Graphics::Present()
 void Graphics::ClearBuffer(float red, float green, float blue) noexcept
 {
 	const float color[] = { red, green, blue, 0 };
-	pContext->ClearRenderTargetView(pTarget.Get(), color);
+	pContext->ClearRenderTargetView(pRenderTarget.Get(), color);
+}
+
+void Graphics::DrawTestTriangle()
+{
+	struct Vertex
+	{
+		float x;
+		float y;
+	};
+
+	const Vertex vertices[] =
+	{
+		{ 0.0f,  0.0f},
+		{ 0.5f, -0.5f},
+		{-0.5f, -0.5f},
+	};
+
+	D3D11_BUFFER_DESC bufferDesc = {};
+	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	bufferDesc.CPUAccessFlags = 0;
+	bufferDesc.MiscFlags = 0;
+	bufferDesc.ByteWidth = sizeof(vertices);
+	bufferDesc.StructureByteStride = sizeof(Vertex);
+
+	D3D11_SUBRESOURCE_DATA subData = {};
+	subData.pSysMem = vertices;
+
+	HRESULT hResult;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> pVertexBuffer;
+	GRAPHICS_THROW_INFO(pDevice->CreateBuffer(&bufferDesc, &subData, &pVertexBuffer));
+
+	// Bind vertex buffer to render pipeline
+	const UINT stride = sizeof(Vertex);
+	const UINT offset = 0;
+	pContext->IASetVertexBuffers(0, 1, pVertexBuffer.GetAddressOf(), &stride, &offset);
+
+	// Create pixel shader
+	Microsoft::WRL::ComPtr<ID3D11PixelShader> pPixelShader;
+	Microsoft::WRL::ComPtr<ID3DBlob> pBlob;
+	GRAPHICS_THROW_INFO(D3DReadFileToBlob(L"PixelShader.cso", &pBlob));
+	GRAPHICS_THROW_INFO(pDevice->CreatePixelShader(
+		pBlob->GetBufferPointer(),
+		pBlob->GetBufferSize(),
+		nullptr,
+		&pPixelShader
+	));
+
+	// Bind pixel shader to render pipeline
+	pContext->PSSetShader(pPixelShader.Get(), nullptr, 0);
+
+	// Create vertex shader
+	Microsoft::WRL::ComPtr<ID3D11VertexShader> pVertexShader;
+	GRAPHICS_THROW_INFO(D3DReadFileToBlob(L"VertexShader.cso", &pBlob));
+	GRAPHICS_THROW_INFO(pDevice->CreateVertexShader(
+		pBlob->GetBufferPointer(),
+		pBlob->GetBufferSize(),
+		nullptr,
+		&pVertexShader
+	));
+
+	// Bind vertex shader to render pipeline
+	pContext->VSSetShader(pVertexShader.Get(), nullptr, 0);
+
+	// Create Input Layout
+	Microsoft::WRL::ComPtr<ID3D11InputLayout> pInputLayout;
+	const D3D11_INPUT_ELEMENT_DESC inputElementDesc[] =
+	{
+		{
+			"POSITION",
+			0,
+			DXGI_FORMAT_R32G32_FLOAT,
+			0,
+			0,
+			D3D11_INPUT_PER_VERTEX_DATA,
+			0,
+		},
+	};
+	GRAPHICS_THROW_INFO(pDevice->CreateInputLayout(
+		inputElementDesc,
+		(UINT)std::size(inputElementDesc),
+		pBlob->GetBufferPointer(),	// blob still contains vertex shader
+		pBlob->GetBufferSize(),
+		&pInputLayout
+	));
+
+	// Bind input layout
+	pContext->IASetInputLayout(pInputLayout.Get());
+
+	// Bind render target
+	pContext->OMSetRenderTargets(1, pRenderTarget.GetAddressOf(), nullptr);
+
+	// Set primitive topology
+	pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+
+	// Configure viewport
+	D3D11_VIEWPORT viewport;
+	viewport.Width = 800;
+	viewport.Height = 600;
+	viewport.MinDepth = 0;
+	viewport.MaxDepth = 1;
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+	pContext->RSSetViewports(1, &viewport);
+
+	GRAPHICS_THROW_INFO_ONLY(pContext->Draw((UINT)std::size(vertices), 0));
 }
 
 
@@ -185,4 +295,42 @@ std::string Graphics::GraphicsException::GetDebugInfo() const noexcept
 const char* Graphics::DeviceRemovedException::GetType() const noexcept
 {
 	return "Graphics Exception: Device removed (DXGI_ERROR_DEVICE_REMOVED)";
+}
+
+
+
+
+/*
+ *	Implementation of Graphics::InfoException
+ */
+
+Graphics::InfoException::InfoException(int line, const char* file, std::vector<std::string> messages)
+	:
+	Exception(line, file)
+{
+	for (int i = 0; i < messages.size(); i++)
+	{
+		debugInfo += messages[i];
+		if (i < messages.size() - 1) debugInfo += '\n';
+	}
+}
+
+const char* Graphics::InfoException::what() const noexcept
+{
+	std::ostringstream oss;
+	oss << GetType() << "\n"
+		<< "\n[Debug Info]\n" << GetDebugInfo() << "\n\n"
+		<< GetOriginString();
+	whatBuffer = oss.str();
+	return whatBuffer.c_str();
+}
+
+const char* Graphics::InfoException::GetType() const noexcept
+{
+	return "Graphics Info Exception";
+}
+
+std::string Graphics::InfoException::GetDebugInfo() const noexcept
+{
+	return debugInfo;
 }
