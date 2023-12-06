@@ -138,25 +138,53 @@ void Graphics::DrawTestTriangle()
 		{-0.5f, -0.5f, 0  , 0  , 255, 255},
 	};
 
-	D3D11_BUFFER_DESC bufferDesc = {};
-	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	bufferDesc.CPUAccessFlags = 0;
-	bufferDesc.MiscFlags = 0;
-	bufferDesc.ByteWidth = sizeof(vertices);
-	bufferDesc.StructureByteStride = sizeof(Vertex);
-
-	D3D11_SUBRESOURCE_DATA subData = {};
-	subData.pSysMem = vertices;
-
 	HRESULT hResult;
+
+	D3D11_BUFFER_DESC vertexBufferDesc = {};
+	vertexBufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	vertexBufferDesc.CPUAccessFlags = 0;
+	vertexBufferDesc.MiscFlags = 0;
+	vertexBufferDesc.ByteWidth = sizeof(vertices);
+	vertexBufferDesc.StructureByteStride = sizeof(Vertex);
+
+	D3D11_SUBRESOURCE_DATA vertexSubresourceData = {};
+	vertexSubresourceData.pSysMem = vertices;
+
 	Microsoft::WRL::ComPtr<ID3D11Buffer> pVertexBuffer;
-	GRAPHICS_THROW_INFO(pDevice->CreateBuffer(&bufferDesc, &subData, &pVertexBuffer));
+	GRAPHICS_THROW_INFO(pDevice->CreateBuffer(&vertexBufferDesc, &vertexSubresourceData, &pVertexBuffer));
+
 
 	// Bind vertex buffer to render pipeline
 	const UINT stride = sizeof(Vertex);
 	const UINT offset = 0;
 	pContext->IASetVertexBuffers(0, 1, pVertexBuffer.GetAddressOf(), &stride, &offset);
+
+
+	// Create index buffer
+	const unsigned short indices[] =
+	{
+		0, 1, 2
+	};
+
+	D3D11_BUFFER_DESC indexBufferDesc = {};
+	indexBufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+	indexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	indexBufferDesc.CPUAccessFlags = 0;
+	indexBufferDesc.MiscFlags = 0;
+	indexBufferDesc.ByteWidth = sizeof(indices);
+	indexBufferDesc.StructureByteStride = sizeof(unsigned short);
+
+	D3D11_SUBRESOURCE_DATA indexSubresourceData = {};
+	indexSubresourceData.pSysMem = indices;
+
+	Microsoft::WRL::ComPtr<ID3D11Buffer> pIndexBuffer;
+	GRAPHICS_THROW_INFO(pDevice->CreateBuffer(&indexBufferDesc, &indexSubresourceData, &pIndexBuffer));
+
+
+	// Bind index buffer to render pipeline
+	pContext->IASetIndexBuffer(pIndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
+
 
 	// Create pixel shader
 	Microsoft::WRL::ComPtr<ID3D11PixelShader> pPixelShader;
@@ -169,8 +197,10 @@ void Graphics::DrawTestTriangle()
 		&pPixelShader
 	));
 
+
 	// Bind pixel shader to render pipeline
 	pContext->PSSetShader(pPixelShader.Get(), nullptr, 0);
+
 
 	// Create vertex shader
 	Microsoft::WRL::ComPtr<ID3D11VertexShader> pVertexShader;
@@ -182,8 +212,10 @@ void Graphics::DrawTestTriangle()
 		&pVertexShader
 	));
 
+
 	// Bind vertex shader to render pipeline
 	pContext->VSSetShader(pVertexShader.Get(), nullptr, 0);
+
 
 	// Create Input Layout
 	Microsoft::WRL::ComPtr<ID3D11InputLayout> pInputLayout;
@@ -216,14 +248,18 @@ void Graphics::DrawTestTriangle()
 		&pInputLayout
 	));
 
+
 	// Bind input layout
 	pContext->IASetInputLayout(pInputLayout.Get());
+
 
 	// Bind render target
 	pContext->OMSetRenderTargets(1, pRenderTarget.GetAddressOf(), nullptr);
 
+
 	// Set primitive topology
 	pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+
 
 	// Configure viewport
 	D3D11_VIEWPORT viewport;
@@ -235,7 +271,8 @@ void Graphics::DrawTestTriangle()
 	viewport.TopLeftY = 0;
 	pContext->RSSetViewports(1, &viewport);
 
-	GRAPHICS_THROW_INFO_ONLY(pContext->Draw((UINT)std::size(vertices), 0));
+
+	GRAPHICS_THROW_INFO_ONLY(pContext->DrawIndexed((UINT)std::size(indices), 0, 0));
 }
 
 
