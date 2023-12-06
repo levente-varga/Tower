@@ -111,7 +111,7 @@ void Graphics::ClearBuffer(float red, float green, float blue) noexcept
 	pContext->ClearRenderTargetView(pRenderTarget.Get(), color);
 }
 
-void Graphics::DrawTestTriangle(float angle)
+void Graphics::DrawTestTriangle(float angle, float x, float y)
 {
 	struct Vertex
 	{
@@ -198,7 +198,8 @@ void Graphics::DrawTestTriangle(float angle)
 	{
 		DirectX::XMMatrixTranspose( // The vertex shader expects a column-major matrix
 			DirectX::XMMatrixRotationZ(angle) *
-			DirectX::XMMatrixScaling(3.0f / 4.0f, 1.0f, 1.0f)
+			DirectX::XMMatrixScaling(3.0f / 4.0f, 1.0f, 1.0f) *
+			DirectX::XMMatrixTranslation(x, y, 0)
 		)
 	};
 

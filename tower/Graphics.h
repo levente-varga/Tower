@@ -18,7 +18,7 @@ public:
 	void Present();
 	void ClearBuffer(float red, float green, float blue) noexcept;
 
-	void DrawTestTriangle(float angle);
+	void DrawTestTriangle(float angle, float x, float y);
 
 private:
 	// &p on these is equal to p.ReleaseAndGetAddressOf()
