@@ -110,7 +110,7 @@ void Graphics::ClearBuffer(float red, float green, float blue) noexcept
 	pContext->ClearRenderTargetView(pRenderTarget.Get(), color);
 }
 
-void Graphics::DrawTestTriangle()
+void Graphics::DrawTestTriangle(float angle)
 {
 	struct Vertex
 	{
@@ -133,9 +133,10 @@ void Graphics::DrawTestTriangle()
 
 	const Vertex vertices[] =
 	{
-		{ 0.0f,  0.0f, 255, 0  , 0  , 255},
-		{ 0.5f, -0.5f, 0  , 255, 0  , 255},
-		{-0.5f, -0.5f, 0  , 0  , 255, 255},
+		{ 0.0f,  0.0f, 255, 0,   0,   255},
+		{ 0.5f, -0.5f, 0,   255, 0,   255},
+		{-0.5f, -0.5f, 0,   0,   255, 255},
+		{ 0.0f, -1.0f, 255, 255, 0,   255},
 	};
 
 	HRESULT hResult;
@@ -164,7 +165,8 @@ void Graphics::DrawTestTriangle()
 	// Create index buffer
 	const unsigned short indices[] =
 	{
-		0, 1, 2
+		0, 1, 2,
+		2, 1, 3,
 	};
 
 	D3D11_BUFFER_DESC indexBufferDesc = {};
@@ -184,6 +186,43 @@ void Graphics::DrawTestTriangle()
 
 	// Bind index buffer to render pipeline
 	pContext->IASetIndexBuffer(pIndexBuffer.Get(), DXGI_FORMAT_R16_UINT, 0);
+
+
+	// Create constant buffer for transformation matrix
+	struct ConstantBuffer
+	{
+		struct
+		{
+			float element[4][4];
+		}
+		transformation;
+	};
+	const ConstantBuffer constantBuffer =
+	{
+		{
+			 (3.0f / 4.0f) * std::cos(angle),  std::sin(angle), 0.0f, 0.0f,
+			 (3.0f / 4.0f) * -std::sin(angle), std::cos(angle), 0.0f, 0.0f,
+			 0.0f,                             0.0f,            1.0f, 0.0f,
+			 0.0f,                             0.0f,            0.0f, 1.0f,
+		}
+	};
+
+	D3D11_BUFFER_DESC constantBufferDesc = {};
+	constantBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	constantBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	constantBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	constantBufferDesc.MiscFlags = 0;
+	constantBufferDesc.ByteWidth = sizeof(constantBuffer);
+	constantBufferDesc.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA constantSubresourceData = {};
+	constantSubresourceData.pSysMem = &constantBuffer;
+
+	Microsoft::WRL::ComPtr<ID3D11Buffer> pConstantBuffer;
+	GRAPHICS_THROW_INFO(pDevice->CreateBuffer(&constantBufferDesc, &constantSubresourceData, &pConstantBuffer));
+
+	// Bind index buffer to render pipeline
+	pContext->VSSetConstantBuffers(0, 1, pConstantBuffer.GetAddressOf());
 
 
 	// Create pixel shader
@@ -258,7 +297,7 @@ void Graphics::DrawTestTriangle()
 
 
 	// Set primitive topology
-	pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+	pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 
 	// Configure viewport
