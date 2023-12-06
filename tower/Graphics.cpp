@@ -4,6 +4,7 @@
 #include <sstream>
 #include "Graphics.h"
 #include <d3dcompiler.h>
+#include <DirectXMath.h>
 
 
 #define GRAPHICS_EXCEPTION_NO_INFO(hResult) Graphics::GraphicsException(__LINE__, __FILE__, (hr))
@@ -191,20 +192,14 @@ void Graphics::DrawTestTriangle(float angle)
 	// Create constant buffer for transformation matrix
 	struct ConstantBuffer
 	{
-		struct
-		{
-			float element[4][4];
-		}
-		transformation;
+		DirectX::XMMATRIX transform;
 	};
 	const ConstantBuffer constantBuffer =
 	{
-		{
-			 (3.0f / 4.0f) * std::cos(angle),  std::sin(angle), 0.0f, 0.0f,
-			 (3.0f / 4.0f) * -std::sin(angle), std::cos(angle), 0.0f, 0.0f,
-			 0.0f,                             0.0f,            1.0f, 0.0f,
-			 0.0f,                             0.0f,            0.0f, 1.0f,
-		}
+		DirectX::XMMatrixTranspose( // The vertex shader expects a column-major matrix
+			DirectX::XMMatrixRotationZ(angle) *
+			DirectX::XMMatrixScaling(3.0f / 4.0f, 1.0f, 1.0f)
+		)
 	};
 
 	D3D11_BUFFER_DESC constantBufferDesc = {};
