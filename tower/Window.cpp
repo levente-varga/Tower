@@ -1,7 +1,7 @@
 #include "Window.h"
 #include <sstream>
-#include <optional>
 #include "resource.h"
+#include "WindowMacros.h"
 
 /*
  *	Implementation of Window

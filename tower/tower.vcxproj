@@ -163,11 +163,13 @@
     <ClInclude Include="DebugInfoManager.h" />
     <ClInclude Include="Exception.h" />
     <ClInclude Include="Graphics.h" />
+    <ClInclude Include="GraphicsMacros.h" />
     <ClInclude Include="Keyboard.h" />
     <ClInclude Include="Mouse.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Window.h" />
+    <ClInclude Include="WindowMacros.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="tower.rc" />

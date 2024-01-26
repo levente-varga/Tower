@@ -3,10 +3,10 @@
 #include "Graphics.h"
 #include <dxgidebug.h>
 #include <memory>
+#include "GraphicsMacros.h"
+#include "WindowMacros.h"
 
 #pragma comment(lib, "dxguid.lib")
-
-#define GRAPHICS_THROW_NO_INFO(hResultCall) if (FAILED(hResult = (hResultCall))) throw Graphics::GraphicsException(__LINE__, __FILE__, hResult);
 
 DebugInfoManager::DebugInfoManager()
 {
