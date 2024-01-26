@@ -3,7 +3,6 @@
 
 #include <sstream>
 #include "Graphics.h"
-#include <d3dcompiler.h>
 #include <DirectXMath.h>
 #include "GraphicsMacros.h"
 
@@ -61,8 +60,50 @@ Graphics::Graphics(HWND windowHandle)
 	GRAPHICS_THROW_INFO(pDevice->CreateRenderTargetView(
 		pBackBuffer.Get(),
 		nullptr,
-		&pRenderTarget
+		&pRenderTargetView
 	));
+
+	// Create and bind depth stencil state
+	D3D11_DEPTH_STENCIL_DESC depthStencilDesc = {};
+	depthStencilDesc.DepthEnable = TRUE;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> pDepthStencilState;
+	GRAPHICS_THROW_INFO(pDevice->CreateDepthStencilState(&depthStencilDesc, &pDepthStencilState));
+	pContext->OMSetDepthStencilState(pDepthStencilState.Get(), 1u);
+
+	// Create depth stensil texture
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> pDepthStencilTexture;
+	D3D11_TEXTURE2D_DESC textureDesc = {};
+	textureDesc.Width = 800u;
+	textureDesc.Height = 600u;
+	textureDesc.MipLevels = 1u;
+	textureDesc.ArraySize = 1u;
+	textureDesc.Format = DXGI_FORMAT_D32_FLOAT;
+	textureDesc.SampleDesc.Count = 1u;
+	textureDesc.SampleDesc.Quality = 0u;
+	textureDesc.Usage = D3D11_USAGE_DEFAULT;
+	textureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	GRAPHICS_THROW_INFO(pDevice->CreateTexture2D(&textureDesc, nullptr, &pDepthStencilTexture));
+
+	// Create view of depth stensil texture
+	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc = {};
+	depthStencilViewDesc.Format = DXGI_FORMAT_D32_FLOAT;
+	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	depthStencilViewDesc.Texture2D.MipSlice = 0u;
+	GRAPHICS_THROW_INFO(pDevice->CreateDepthStencilView(
+		pDepthStencilTexture.Get(), &depthStencilViewDesc, &pDepthStencilView
+	));
+
+	// Configure viewport
+	D3D11_VIEWPORT viewport;
+	viewport.Width = 800;
+	viewport.Height = 600;
+	viewport.MinDepth = 0;
+	viewport.MaxDepth = 1;
+	viewport.TopLeftX = 0;
+	viewport.TopLeftY = 0;
+	pContext->RSSetViewports(1, &viewport);
 }
 
 void Graphics::Present()
@@ -89,12 +130,23 @@ void Graphics::Present()
 void Graphics::ClearBuffer(float red, float green, float blue) noexcept
 {
 	const float color[] = { red, green, blue, 0 };
-	pContext->ClearRenderTargetView(pRenderTarget.Get(), color);
+	pContext->ClearRenderTargetView(pRenderTargetView.Get(), color);
+	pContext->ClearDepthStencilView(pDepthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.0f, 0u);
 }
 
 void Graphics::DrawIndexed(UINT count) noexcept(!IS_DEBUG)
 {
 	GRAPHICS_THROW_INFO_ONLY(pContext->DrawIndexed(count, 0, 0));
+}
+
+void Graphics::SetProjectionMatrix(DirectX::XMMATRIX projection) noexcept
+{
+	projectionMatrix = projection;
+}
+
+DirectX::XMMATRIX Graphics::GetProjectionMatrix() const noexcept
+{
+	return projectionMatrix;
 }
 
 void Graphics::DrawTestTriangle(float angle, float x, float y)
@@ -145,7 +197,11 @@ void Graphics::DrawTestTriangle(float angle, float x, float y)
 	vertexSubresourceData.pSysMem = vertices;
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> pVertexBuffer;
-	GRAPHICS_THROW_INFO(pDevice->CreateBuffer(&vertexBufferDesc, &vertexSubresourceData, &pVertexBuffer));
+	GRAPHICS_THROW_INFO(pDevice->CreateBuffer(
+		&vertexBufferDesc,
+		&vertexSubresourceData,
+		&pVertexBuffer
+	));
 
 
 	// Bind vertex buffer to render pipeline
@@ -177,7 +233,11 @@ void Graphics::DrawTestTriangle(float angle, float x, float y)
 	indexSubresourceData.pSysMem = indices;
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> pIndexBuffer;
-	GRAPHICS_THROW_INFO(pDevice->CreateBuffer(&indexBufferDesc, &indexSubresourceData, &pIndexBuffer));
+	GRAPHICS_THROW_INFO(pDevice->CreateBuffer(
+		&indexBufferDesc,
+		&indexSubresourceData,
+		&pIndexBuffer
+	));
 
 
 	// Bind index buffer to render pipeline
@@ -212,7 +272,11 @@ void Graphics::DrawTestTriangle(float angle, float x, float y)
 	constantSubresourceData.pSysMem = &constantBuffer;
 
 	Microsoft::WRL::ComPtr<ID3D11Buffer> pConstantBuffer;
-	GRAPHICS_THROW_INFO(pDevice->CreateBuffer(&constantBufferDesc, &constantSubresourceData, &pConstantBuffer));
+	GRAPHICS_THROW_INFO(pDevice->CreateBuffer(
+		&constantBufferDesc,
+		&constantSubresourceData,
+		&pConstantBuffer
+	));
 
 	// Bind index buffer to render pipeline
 	pContext->VSSetConstantBuffers(0, 1, pConstantBuffer.GetAddressOf());
@@ -286,7 +350,7 @@ void Graphics::DrawTestTriangle(float angle, float x, float y)
 
 
 	// Bind render target
-	pContext->OMSetRenderTargets(1, pRenderTarget.GetAddressOf(), nullptr);
+	pContext->OMSetRenderTargets(1, pRenderTargetView.GetAddressOf(), nullptr);
 
 
 	// Set primitive topology

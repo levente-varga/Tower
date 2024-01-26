@@ -6,6 +6,9 @@
 #include <vector>
 #include "DebugInfoManager.h"
 #include <wrl.h>
+#include <DirectXMath.h>
+#include <d3dcompiler.h>
+
 
 class Graphics
 {
@@ -21,12 +24,18 @@ public:
 	void DrawIndexed(UINT count) noexcept(!IS_DEBUG);
 	void DrawTestTriangle(float angle, float x, float y);
 
+	void SetProjectionMatrix(DirectX::XMMATRIX projection) noexcept;
+	DirectX::XMMATRIX GetProjectionMatrix() const noexcept;
+
 private:
+	DirectX::XMMATRIX projectionMatrix;
+
 	// &p on these is equal to p.ReleaseAndGetAddressOf()
 	Microsoft::WRL::ComPtr<ID3D11Device> pDevice;
 	Microsoft::WRL::ComPtr<IDXGISwapChain> pSwapChain;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> pContext;
-	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> pRenderTarget;
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> pRenderTargetView;
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> pDepthStencilView;
 
 	// Only have this field if the app is built in debug mode
 #ifndef NDEBUG
