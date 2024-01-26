@@ -184,6 +184,7 @@ LRESULT Window::HandleMessage(HWND windowHandle, UINT messageType, WPARAM wParam
 	{
 		const POINTS point = MAKEPOINTS(lParam);
 		mouse.OnMiddlePressed(point.x, point.y);
+		SetForegroundWindow(windowHandle);
 		break;
 	}
 	case WM_LBUTTONUP:

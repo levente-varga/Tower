@@ -92,6 +92,11 @@ void Graphics::ClearBuffer(float red, float green, float blue) noexcept
 	pContext->ClearRenderTargetView(pRenderTarget.Get(), color);
 }
 
+void Graphics::DrawIndexed(UINT count) noexcept(!IS_DEBUG)
+{
+	GRAPHICS_THROW_INFO_ONLY(pContext->DrawIndexed(count, 0, 0));
+}
+
 void Graphics::DrawTestTriangle(float angle, float x, float y)
 {
 	struct Vertex

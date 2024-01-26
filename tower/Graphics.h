@@ -9,6 +9,7 @@
 
 class Graphics
 {
+	friend class Bindable;
 public:
 	Graphics(HWND windowHandle);
 	Graphics(const Graphics&) = delete;
@@ -17,7 +18,7 @@ public:
 
 	void Present();
 	void ClearBuffer(float red, float green, float blue) noexcept;
-
+	void DrawIndexed(UINT count) noexcept(!IS_DEBUG);
 	void DrawTestTriangle(float angle, float x, float y);
 
 private:
