@@ -9,7 +9,7 @@ InputLayout::InputLayout(Graphics& graphics,
 
 	GRAPHICS_THROW_INFO(GetDevice(graphics)->CreateInputLayout(
 		layout.data(),
-		layout.size(),
+		(UINT)layout.size(),
 		pVertexShaderBytecode->GetBufferPointer(),
 		pVertexShaderBytecode->GetBufferSize(),
 		&pInputLayout

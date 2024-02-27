@@ -49,7 +49,7 @@ public:
 		));
 	}
 	~ConstantBuffer() noexcept = default;
-	void Update(Graphics& graphics, const T& constants) noexcept
+	void Update(Graphics& graphics, const T& constants)
 	{
 		INFO_MANAGER(graphics);
 
