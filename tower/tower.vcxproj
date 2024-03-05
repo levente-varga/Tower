@@ -157,6 +157,7 @@
   <ItemGroup>
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Bindable.cpp" />
+    <ClCompile Include="Box.cpp" />
     <ClCompile Include="DebugInfoManager.cpp" />
     <ClCompile Include="Drawable.cpp" />
     <ClCompile Include="Exception.cpp" />
@@ -178,6 +179,7 @@
   <ItemGroup>
     <ClInclude Include="Application.h" />
     <ClInclude Include="Bindable.h" />
+    <ClInclude Include="Box.h" />
     <ClInclude Include="ConstantBuffer.h" />
     <ClInclude Include="CustomWindows.h" />
     <ClInclude Include="DebugInfoManager.h" />
