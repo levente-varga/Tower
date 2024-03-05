@@ -11,10 +11,10 @@
 Box::Box(
 	Graphics& graphics,
 	std::mt19937& rng,
-	std::uniform_real_distribution<float> adist,
-	std::uniform_real_distribution<float> ddist,
-	std::uniform_real_distribution<float> odist,
-	std::uniform_real_distribution<float> rdist
+	std::uniform_real_distribution<float>& adist,
+	std::uniform_real_distribution<float>& ddist,
+	std::uniform_real_distribution<float>& odist,
+	std::uniform_real_distribution<float>& rdist
 ) :
 	r(rdist(rng)),
 	dRoll(ddist(rng)),
@@ -103,20 +103,22 @@ Box::Box(
 	};
 	AddBind(std::make_unique<InputLayout>(graphics, inputElementDesc, pVertexShaderByteCode));
 	AddBind(std::make_unique<Topology>(graphics, D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST));
+	OutputDebugStringA(this == NULL ? "NULL" : "OK");
+	OutputDebugStringA(" - in Box Constructor\n");
 	AddBind(std::make_unique<TransformConstantBuffer>(graphics, *this));
 }
 
 void Box::Update(float delta) noexcept {
 	roll += dRoll * delta;
 	pitch += dPitch * delta;
-	yaw = dYaw * delta;
-	theta = dTheta * delta;
-	phi = dPhi * delta;
-	chi = dChi * delta;
+	yaw += dYaw * delta;
+	theta += dTheta * delta;
+	phi += dPhi * delta;
+	chi += dChi * delta;
 }
 
-DirectX::XMMATRIX Box::GetTransform() const noexcept {
-	return DirectX::XMMatrixRotationRollPitchYaw(roll, pitch, yaw)
+DirectX::XMMATRIX Box::GetTransformMatrix() const noexcept {
+	return DirectX::XMMatrixRotationRollPitchYaw(pitch, yaw, roll)
 		* DirectX::XMMatrixTranslation(r, 0, 0)
 		* DirectX::XMMatrixRotationRollPitchYaw(theta, phi, chi)
 		* DirectX::XMMatrixTranslation(0, 0, 20);

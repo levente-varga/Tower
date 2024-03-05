@@ -22,7 +22,6 @@ public:
 	void Present();
 	void ClearBuffer(float red, float green, float blue) noexcept;
 	void DrawIndexed(UINT count) noexcept(!IS_DEBUG);
-	void DrawTestTriangle(float angle, float x, float y);
 
 	void SetProjectionMatrix(DirectX::XMMATRIX projection) noexcept;
 	DirectX::XMMATRIX GetProjectionMatrix() const noexcept;

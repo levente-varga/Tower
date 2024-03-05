@@ -16,7 +16,7 @@ public:
 
 	virtual DirectX::XMMATRIX GetTransformMatrix() const noexcept = 0;
 	void Draw(Graphics& graphics) const noexcept(!IS_DEBUG);
-	virtual void Update(float dt) noexcept = 0;
+	virtual void Update(float delta) noexcept = 0;
 	void AddBind(std::unique_ptr<Bindable> bind) noexcept(!IS_DEBUG);
 	void AddIndexBuffer(std::unique_ptr<class IndexBuffer> indexBuffer) noexcept;
 
