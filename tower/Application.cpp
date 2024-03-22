@@ -40,7 +40,7 @@ void Application::DoFrame()
 {
 	float delta = timer.Mark();
 
-	window.GetGraphics().ClearBuffer(0, 0, 0);
+	window.GetGraphics().ClearBuffer(0.07f, 0.07f, 0.07f);
 	for (auto& box : boxes) {
 		box->Update(delta);
 		box->Draw(window.GetGraphics());

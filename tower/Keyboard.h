@@ -27,7 +27,7 @@ public:
 
 		bool IsPress() const noexcept;
 		bool IsRelease() const noexcept;
-		bool IsValid() const noexcept;
+		bool IsInvalid() const noexcept;
 		Type GetType() const noexcept;
 		unsigned char GetKeyCode() const noexcept;
 	};

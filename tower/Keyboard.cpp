@@ -133,12 +133,12 @@ bool Keyboard::Event::IsPress() const noexcept
 
 bool Keyboard::Event::IsRelease() const noexcept
 {
-	return type == Type::Press;
+	return type == Type::Release;
 }
 
-bool Keyboard::Event::IsValid() const noexcept
+bool Keyboard::Event::IsInvalid() const noexcept
 {
-	return type == Type::Press;
+	return type == Type::Invalid;
 }
 
 Keyboard::Event::Type Keyboard::Event::GetType() const noexcept
