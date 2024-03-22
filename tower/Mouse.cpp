@@ -21,17 +21,17 @@ bool Mouse::IsInWindow() const noexcept
 	return isInWindow;
 }
 
-bool Mouse::LeftIsPressed() const noexcept
+bool Mouse::IsLeftPressed() const noexcept
 {
 	return leftIsPressed;
 }
 
-bool Mouse::RightIsPressed() const noexcept
+bool Mouse::IsRightPressed() const noexcept
 {
 	return rightIsPressed;
 }
 
-bool Mouse::MiddleIsPressed() const noexcept
+bool Mouse::IsMiddlePressed() const noexcept
 {
 	return middleIsPressed;
 }
@@ -156,7 +156,7 @@ void Mouse::TrimBuffer() noexcept
 	}
 }
 
-bool Mouse::QueueIsEmpty() const noexcept
+bool Mouse::IsQueueEmpty() const noexcept
 {
 	return buffer.empty();
 }
@@ -170,9 +170,9 @@ bool Mouse::QueueIsEmpty() const noexcept
 Mouse::Event::Event() noexcept
 	:
 	type(Type::Invalid),
-	leftIsPressed(false),
-	rightIsPressed(false),
-	middleIsPressed(false),
+	isLeftPressed(false),
+	isRightPressed(false),
+	isMiddlePressed(false),
 	x(0),
 	y(0)
 {}
@@ -180,9 +180,9 @@ Mouse::Event::Event() noexcept
 Mouse::Event::Event(Type type, const Mouse& mouse) noexcept
 	:
 	type(type),
-	leftIsPressed(mouse.leftIsPressed),
-	rightIsPressed(mouse.rightIsPressed),
-	middleIsPressed(mouse.middleIsPressed),
+	isLeftPressed(mouse.leftIsPressed),
+	isRightPressed(mouse.rightIsPressed),
+	isMiddlePressed(mouse.middleIsPressed),
 	x(mouse.x),
 	y(mouse.y)
 {}
@@ -212,17 +212,17 @@ int Mouse::Event::GetPositionY() const noexcept
 	return y;
 }
 
-bool Mouse::Event::LeftIsPressed() const noexcept
+bool Mouse::Event::IsLeftPressed() const noexcept
 {
-	return leftIsPressed;
+	return isLeftPressed;
 }
 
-bool Mouse::Event::RightIsPressed() const noexcept
+bool Mouse::Event::IsRightPressed() const noexcept
 {
-	return rightIsPressed;
+	return isRightPressed;
 }
 
-bool Mouse::Event::MiddleIsPressed() const noexcept
+bool Mouse::Event::IsMiddlePressed() const noexcept
 {
-	return middleIsPressed;
+	return isMiddlePressed;
 }

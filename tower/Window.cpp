@@ -156,7 +156,7 @@ LRESULT Window::HandleMessage(HWND windowHandle, UINT messageType, WPARAM wParam
 		}
 		else
 		{
-			if (mouse.LeftIsPressed() || mouse.RightIsPressed() || mouse.MiddleIsPressed())
+			if (mouse.IsLeftPressed() || mouse.IsRightPressed() || mouse.IsMiddlePressed())
 			{
 				mouse.OnMouseMove(point.x, point.y);
 			}

@@ -36,9 +36,9 @@ public:
 	Keyboard(const Keyboard&) = delete;
 	Keyboard& operator=(const Keyboard&) = delete;
 
-	bool KeyIsPressed(unsigned char keyCode) const noexcept;
+	bool IsKeyPressed(unsigned char keyCode) const noexcept;
 	Event ReadKey() noexcept;
-	bool KeyQueueIsEmpty() const noexcept;
+	bool IsKeyQueueEmpty() const noexcept;
 	void ClearKeyQueue() noexcept;
 
 	char ReadChar() noexcept;
@@ -60,10 +60,10 @@ private:
 	template<typename T>
 	static void TrimBuffer(std::queue<T>& buffer) noexcept;
 
-	static constexpr unsigned int nKeys = 256;
+	static constexpr unsigned int numOfKeys = 256;
 	static constexpr unsigned int bufferMaxSize = 16;
 	bool autoRepeatEnabled = false;
-	std::bitset<nKeys> keyStates;
+	std::bitset<numOfKeys> keyStates;
 	std::queue<Event> keyBuffer;
 	std::queue<char> charBuffer;
 };

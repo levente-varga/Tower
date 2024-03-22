@@ -28,11 +28,11 @@ public:
 
 	private:
 		Type type;
-		bool leftIsPressed;
-		bool rightIsPressed;
-		bool middleIsPressed;
-		int x;
-		int y;
+		bool isLeftPressed;
+		bool isRightPressed;
+		bool isMiddlePressed;
+		int positionX;
+		int positionY;
 
 	public:
 		Event() noexcept;
@@ -43,9 +43,9 @@ public:
 		std::pair<int, int> GetPosition() const noexcept;
 		int GetPositionX() const noexcept;
 		int GetPositionY() const noexcept;
-		bool LeftIsPressed() const noexcept;
-		bool RightIsPressed() const noexcept;
-		bool MiddleIsPressed() const noexcept;
+		bool IsLeftPressed() const noexcept;
+		bool IsRightPressed() const noexcept;
+		bool IsMiddlePressed() const noexcept;
 	};
 
 public:
@@ -57,11 +57,11 @@ public:
 	int GetPositionX() const noexcept;
 	int GetPositionY() const noexcept;
 	bool IsInWindow() const noexcept;
-	bool LeftIsPressed() const noexcept;
-	bool RightIsPressed() const noexcept;
-	bool MiddleIsPressed() const noexcept;
+	bool IsLeftPressed() const noexcept;
+	bool IsRightPressed() const noexcept;
+	bool IsMiddlePressed() const noexcept;
 	Mouse::Event Read() noexcept;
-	bool QueueIsEmpty() const noexcept;
+	bool IsQueueEmpty() const noexcept;
 	void ClearQueue() noexcept;
 	int wheelDeltaCarry = 0;
 private:
@@ -80,8 +80,8 @@ private:
 	void TrimBuffer() noexcept;
 
 	static constexpr unsigned int bufferMaxSize = 16;
-	int x = -1;
-	int y = -1;
+	int positionX = -1;
+	int positionY = -1;
 	bool isInWindow;
 	bool leftIsPressed = false;
 	bool rightIsPressed = false;

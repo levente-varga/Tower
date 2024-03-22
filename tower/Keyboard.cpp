@@ -1,6 +1,6 @@
 #include "Keyboard.h"
 
-bool Keyboard::KeyIsPressed(unsigned char keyCode) const noexcept
+bool Keyboard::IsKeyPressed(unsigned char keyCode) const noexcept
 {
 	return keyStates[keyCode];
 }
@@ -19,7 +19,7 @@ Keyboard::Event Keyboard::ReadKey() noexcept
 	}
 }
 
-bool Keyboard::KeyQueueIsEmpty() const noexcept
+bool Keyboard::IsKeyQueueEmpty() const noexcept
 {
 	return keyBuffer.empty();
 }
