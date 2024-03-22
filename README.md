@@ -21,11 +21,11 @@ Error handling is crucial during development and testing, so a solution is imple
 
 ### First window
 
-Display an empty window when running the project using the DirectX API.
+Display an empty window using the DirectX API.
 
 ### Mouse and keyboard input
 
-Maintain the full state of the keyboard and mouse keys. The state should be queried.
+Maintain the full state of the keyboard and mouse keys.
 
 ### Exception handling
 
@@ -33,7 +33,7 @@ Whenever the applications encounters an exception related to DirectX, a popup sh
 
 ### Draw the first triangle
 
-Draw a triangle to the window using DirectX.
+Draw a triangle to the window using shaders.
 
 ### Transformations
 
@@ -49,7 +49,7 @@ Set different colors for different faces of meshes. Could be extended to support
 
 ### Materials
 
-A system for setting basic material parameters for objects, such as shininess and color.
+Use a system for setting basic material properties for objects, such as shininess and color.
 
 ### Directional and point lights
 
@@ -61,8 +61,8 @@ Every object in the game should derive from the same super class.
 
 ### Camera system
 
-The camera should be a game object with unique properties (i.e. transform, zoom, aspect ratio etc.). Support multiple cameras.
+The camera should be a game object with unique properties (transform, zoom, aspect ratio etc.). Support multiple cameras.
 
 ### More primitive objects
 
-Support a variety of built-in primitive objects like plane, cube, sphere etc. Would be useful for showcasing the capabilities of the engine.
+Support a variety of built-in primitive objects like plane, cube and sphere. Would be useful for showcasing the capabilities of the engine.
