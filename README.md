@@ -1,5 +1,7 @@
 # Tower
 
+#### Written in C++ and HLSL using Visual Studio
+
 A game engine in development, powered by DirectX11.
 
 Fully implemented in C++ and HLSL, features proper exception handling.
