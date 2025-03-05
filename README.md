@@ -21,50 +21,15 @@ Error handling is crucial during development and testing, so a solution is imple
 
 ![Roadmap of the project](images/Roadmap.png "Roadmap")
 
-### First window
-
-Display an empty window using the DirectX API.
-
-### Mouse and keyboard input
-
-Maintain the full state of the keyboard and mouse keys.
-
-### Exception handling
-
-Whenever the applications encounters an exception related to DirectX, a popup should be shown containing the description of the issue queried from the DirectX API.
-
-### Draw the first triangle
-
-Draw a triangle to the window using shaders.
-
-### Transformations
-
-Using matrices, move, rotate and scale the rendered meshed.
-
-### More efficient rendering
-
-Reuse buffers if possible between frames.
-
-### Texturing
-
-Set different colors for different faces of meshes. Could be extended to support actual textures being loaded from file.
-
-### Materials
-
-Use a system for setting basic material properties for objects, such as shininess and color.
-
-### Directional and point lights
-
-Shade the objects based on light coming from points (lamp) and set directions (sun), but without casting shadows.
-
-### Game objects
-
-Every object in the game should derive from the same super class.
-
-### Camera system
-
-The camera should be a game object with unique properties (transform, zoom, aspect ratio etc.). Support multiple cameras.
-
-### More primitive objects
-
-Support a variety of built-in primitive objects like plane, cube and sphere. Would be useful for showcasing the capabilities of the engine.
+- __First window__ - Display an empty window using the DirectX API.
+- __Mouse and keyboard input__ - Maintain the full state of the keyboard and mouse keys.
+- __Exception handling__ - Whenever the applications encounters an exception related to DirectX, a popup should be shown containing the description of the issue queried from the DirectX API.
+- __Draw the first triangle__ - Draw a triangle to the window using shaders.
+- __Transformations__ - Using matrices, move, rotate and scale the rendered meshed.
+- __More efficient rendering__ - Reuse buffers if possible between frames.
+- __Texturing__ - Set different colors for different faces of meshes. Could be extended to support actual textures being loaded from file.
+- __Materials__ - Use a system for setting basic material properties for objects, such as shininess and color.
+- __Directional and point lights__ - Shade the objects based on light coming from points (lamp) and set directions (sun), but without casting shadows.
+- __Game objects__ - Every object in the game should derive from the same super class.
+- __Camera system__ - The camera should be a game object with unique properties (transform, zoom, aspect ratio etc.). Support multiple cameras.
+- __More primitive objects__ - Support a variety of built-in primitive objects like plane, cube and sphere. Would be useful for showcasing the capabilities of the engine.
